@@ -22,35 +22,64 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 ## Usage
 
 ![node-explain](assets/explain_large.png "Node explaination")
-To give a glimse on how the node works, we can take a look at this.
+**Fig. 3:** Node explaination
+To give an understanding on how the node works, we can take a look at this where you have three sensors that will enter a registration object that will store data about all sensors. Then it continues to check if any changes has been made to the state, if so, we check if we're active or inactive.
+We need to ensure that the opposite timer is reset (if we use one).
+This flow is merged down into a single node to ease and speed up the view.
 
+![node-appearance](assets/node-appearance.png "Node appearance")  
+**Fig. 1:** Node appearance
+The node has two or three output channels *(by default, it uses two)*.
+The last output channel here is the "status" channel, this one informs about the current state.
+These states matches the structure:
+ `{"id":x, "name":name}`
+
+The different id's are:
+* 0.   Inactive
+* 1.   Active
+* 2.   Activating
+* 3.   Deactivating
+* 130. Abort activation
+* 131. Abort deactivation
 
 <a name="node_configuration"></a>
 ### Node Configuration
-The node configuration sets the active on/off/toggle keywords as well as optional topic names.
+The node configuration sets up how the sensor should react.
 
 ![node-settings](assets/node-settings.png "Node properties")  
 **Fig. 2:** Node properties
 
-#### ON value / OFF value / Toggle value
-These attributes can be of type
-* string
-* number
-* boolean
+#### Name (optional)
+*(Optional)* The name of this node. *(Will change the content of the node to the name)*
 
-They are set to the values you want to be the keywords within `msg.payload` when the actions **switch to ON**, **switch to OFF** and **toggle** shall take place (*execution command*).
+#### Identifier
+The data field that should be used to uniquely identify a sensor.
+Each sensor should have their own unique identifier that this node can use as an id to differentiate it from each other.
 
-**Remark:** If you do not set a value to one of the attributes the according method (e.g. switch ON) can not be executed by the node (it needs a value to compare...).
+#### Input
+The value to read and validate against the **Activate on** and **Deactivate on** values.
+* If the input value doesn't match any of the two values, it will be ignored.
+* If matches the **Activate on** value, it will use the **Identifier** to create a record with an active flag.
+* If matches the **Deactivate on** value, it will try to find an already created record with the current **Identifier** to deactivate the flag.
 
-#### On/Off topic resp. Toggle topic (optional)
-If you set the topic attributes to a value, the input `msg` needs to contain the same topic name to execute **On/Off** resp. **toggle** in addition to the `msg.payload` value containing the execution command.
+#### Activate on / Deactivate on
+The **input** value needs to match one of these fieds to trigger an action.
+As explained for the **input** field, the activation and deactivion will only take place if matching one of these fields.
 
-#### Pass through ON/OFF messages
-The node has three pass through modes:  
- - ***No*** - means that node sends an output `msg` only when state is toggled. ON/OFF input messages just update internal state of the node.
- - ***If changed*** - sends an output `msg` for ON/OFF input message only once it differs from the previous state. And obviously message is always sent for "toggle" message.
- - ***Always*** - the output `msg` is always sent as a reaction on an input `msg`.
+#### Send on active
+As soon as a message where the **input** matches the **Activate on** value, will trigger the activation of the node.
+The data specified in this field will then be sent, either directly or when **Activate delay** time has passed *(If not being deactivated before, then the activation will be canceled out)*.
 
+#### Send on inactive
+When the last active sensor record is received and its **input** value matches the **Deactivate on** value, the deactivation of the node will be executed.
+The data specified in this field will then be sent, either directly or when **Deactivate delay** time has passed *(If not a sensor is being activated again, then the deactivation will be canceled out)*.
+
+#### Activate delay / Deactivate delay
+The delays are there to enable a latency between the actual event and the message being sent.
+You can here choose if to directly send the message when activated/deactivated, or wait a specified amount.
+
+#### Seperated outputs
+If checked, there will be a different channel for the deactivation messages. Otherwise, if unchecked, the activation and deactivation messages will be sent through the same output channel.
 
 <a name="input"></a>
 ### Input
@@ -69,6 +98,11 @@ An example `msg` contents is shown for ***On/Off topic*** = "onofftopic":
 ### Output
 The input `msg` is forwarded to the output, if a valid switch command was detected.  
 The configuration attribute ***pass through ON/OFF messages*** is taken into account.
+
+These attributes can be of type
+* string
+* number
+* boolean
 
 
 ### Node status

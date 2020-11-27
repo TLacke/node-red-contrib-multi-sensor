@@ -30,9 +30,9 @@ module.exports = function(RED) {
         var customStatus;
         var origMsg;
 
-        function get(id) {
+        function get(id, noCreate) {
             var s = sensors.find(function(s) { return s.id==id; });
-            if (!s) {
+            if (!s && !noCreate) {
                 s = {id:id, active:false};
                 sensors.push(s);
             }
@@ -167,9 +167,8 @@ module.exports = function(RED) {
             var activeValue = RED.util.evaluateNodeProperty(config.activeValue, config.activeType, node, msg);
             var inactiveValue = RED.util.evaluateNodeProperty(config.inactiveValue, config.inactiveType, node, msg);
             
-            var s = get(id);
-
             if (inputValue == activeValue) {
+                var s = get(id);
                 var a = countActive();
                 // If same state, then do nothing
                 if (s.active)
@@ -183,8 +182,10 @@ module.exports = function(RED) {
                 }
                 
             } else if (inputValue == inactiveValue) {
+                var s = get(id, true);
+
                 // If same state, then do nothing
-                if (!s.active)
+                if (!s || !s.active)
                     return;
                 
                 s.active = false;
@@ -193,7 +194,7 @@ module.exports = function(RED) {
                     sendOnInactive(msg);
 
             } else {
-                node.warn('Neither active nor inactive');
+                node.debug('Neither active nor inactive');
             }
 
             customStatus = msg.status;
