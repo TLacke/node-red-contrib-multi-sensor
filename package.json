@@ -1,0 +1,29 @@
+{
+    "name": "node-red-multi-sensor",
+    "version": "0.1.0",
+    "description": "A Node-RED multiple binary-sensor linker",
+    "main": "multiSensor.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TLacke/node-red-multi-sensor.git"
+    },
+    "keywords": [
+        "node",
+        "node-red",
+        "sensor",
+        "motion",
+        "binary",
+        "state-machine"
+    ],
+    "node-red": {
+        "nodes": {
+            "multiSensor": "multiSensor.js"
+        }
+    },
+    "bugs": {
+        "url": "https://github.com/TLacke/node-red-multi-sensor/issues"
+    },
+    "homepage": "https://github.com/TLacke/node-red-multi-sensor#readme",
+    "author": "Tommy Lacke <tommy.lacke@gmail.com>",
+    "license": "MIT"
+}

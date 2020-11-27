@@ -1,0 +1,7 @@
+{
+    "trigger" : {
+        "output" : {
+            "nothing": "This is my first message",
+        }
+    }
+}

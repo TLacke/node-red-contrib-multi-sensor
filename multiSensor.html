@@ -1,0 +1,189 @@
+<script type="text/javascript">
+    RED.nodes.registerType('multiSensor',{
+        category: 'function',
+        color: '#a66bcf',
+        defaults: {
+            name: {value:""},
+            idType: {value:"str"},
+            idField: {value:"topic", validate: RED.validators.typedInput("idType")},
+            inputType: {value:"msg"},
+            inputValue: {value:"payload", validate: RED.validators.typedInput("inputType")},
+            activeType: {value:"bool"},
+            activeValue: {value:true, validate: RED.validators.typedInput("activeType")},
+            inactiveType: {value:"bool"},
+            inactiveValue: {value:false, validate: RED.validators.typedInput("inactiveType")},
+            activateDelay: {value: "0", required: true, validate: RED.validators.number()},
+            activateDelayUnit: {value:"seconds"},
+            inactivateDelay: {value: "30", required: true, validate: RED.validators.number()},
+            inactivateDelayUnit: {value:"seconds"},
+            sendOnActiveType: {value:"pay"},
+            sendOnActive: {value:undefined, validate: RED.validators.typedInput("sendOnActiveType")},
+            sendOnInactiveType: {value:"payl"},
+            sendOnInactive: {value:undefined, validate: RED.validators.typedInput("sendOnInactiveType")},
+            seperated: {value:false},
+            outputs: {value:2}
+        },
+        inputs:1,
+        outputs:1,
+        outputLabels: function(index) {
+            var o = this.outputs == 3;
+            switch (index) {
+                case 0: return o ? "Active channel" : "Output channel";
+                case 1: return o ? "Inactive channel" : "Status channel";
+                case 2: return "Status channel";
+            }
+        },
+        icon: "trigger.png",
+        label: function() {
+            return this.name||"multiSensor";
+        },
+
+        oneditprepare: function() {
+            var outputCount = $("#node-input-outputs").val("{}");
+
+            var optionNothing = {value:"nul",label:"Nothing",hasValue:false};
+            var optionOriginalMsg = {value:"pay",label:"Original message",hasValue:false};
+            var optionLatestMsg = {value:"payl",label:"Latest message",hasValue:false};
+            
+            $("#node-input-idField").typedInput({
+                type:"msg",
+                types:["msg","flow","global"],
+                typeField: "#node-input-idType"
+            });
+            $("#node-input-inputValue").typedInput({
+                type:"msg",
+                types:["msg","flow","global","env"],
+                typeField: "#node-input-inputType"
+            });
+            $("#node-input-activeValue").typedInput({
+                type:"bool",
+                types:["msg","flow","global","str","num","bool","re","env"],
+                 typeField: "#node-input-activeType"
+            });
+            $("#node-input-inactiveValue").typedInput({
+                type:"bool",
+                types:["msg","flow","global","str","num","bool","re","env"],
+                typeField: "#node-input-inactiveType"
+            });
+            
+            $("#node-input-activateDelay").spinner({min: 0});
+            $("#node-input-inactivateDelay").spinner({min: 0});
+
+            $("#node-input-sendOnActive").typedInput({
+                types:['msg','flow','global','str','num','bool',"jsonata",'json','bin','date','env',
+                    optionOriginalMsg,
+                    optionNothing
+                ],
+                typeField: "#node-input-sendOnActiveType"
+            });
+
+            $("#node-input-sendOnInactive").typedInput({
+                types:['msg','flow','global','str','num','bool',"jsonata",'json','bin','date','env',
+                    optionOriginalMsg,
+                    optionLatestMsg,
+                    optionNothing
+                ],
+                typeField: "#node-input-sendOnInactiveType"
+            });
+
+            var sepValue = this.outputs == 3;
+            $("#node-input-seperated").prop('checked', (this.outputs == 3));
+            $("#node-input-seperated").change(function() {
+                var s = $("#node-input-seperated").is(":checked");
+                var same = s == sepValue;
+                var currentOutputs = JSON.parse(outputCount.val()||"{}");
+                
+                currentOutputs[0] = 0;
+                if (s) {
+                    currentOutputs[1] = same ? 1 : 2;
+                    currentOutputs[2] = same ? 2 : 1;
+                } else {
+                    delete currentOutputs[1];
+                    currentOutputs[2] = 1;
+                }
+                
+                outputCount.val(JSON.stringify(currentOutputs));
+            });
+        },
+        oneditsave: function() {
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="multiSensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-idField" data-i18n="multiSensor.label.id">Identifier:</label>
+        <input type="text" id="node-input-idField" style="width:70%">
+        <input type="hidden" id="node-input-idType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-inputValue" data-i18n="multiSensor.label.input">Input:</label>
+        <input type="text" id="node-input-inputValue" style="width:70%">
+        <input type="hidden" id="node-input-inputType">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-activeValue" data-i18n="multiSensor.label.onActive">Activate on:</label>
+        <input type="text" id="node-input-activeValue" style="width:70%">
+        <input type="hidden" id="node-input-activeType">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-inactiveValue" data-i18n="multiSensor.label.onDeactivate">Deactive on:</label>
+        <input type="text" id="node-input-inactiveValue" style="width:70%">
+        <input type="hidden" id="node-input-inactiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-sendOnActive" data-i18n="multiSensor.label.sendOnActive">Send on active:</label>
+        <input type="text" id="node-input-sendOnActive" style="width:70%">
+        <input type="hidden" id="node-input-sendOnActiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-sendOnInactive" data-i18n="multiSensor.label.sendOnInactive">Send on inactive:</label>
+        <input type="text" id="node-input-sendOnInactive" style="width:70%">
+        <input type="hidden" id="node-input-sendOnInactiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-activateDelay"><i class="fa fa-clock-o"></i> <span data-i18n="multiSensor.label.activeDelay">Activate delay:</span></label>
+        <input type="text" id="node-input-activateDelay" style="text-align:end; width:50px !important">
+        <select id="node-input-activateDelayUnit" style="width:170px !important">
+            <option value="milliseconds">milliseconds</option>
+            <option value="seconds">seconds</option>
+            <option value="minutes">minutes</option>
+            <option value="hours">hours</option>
+            <option value="days">days</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-inactivateDelay"><i class="fa fa-clock-o"></i> Deactivate delay:</label>
+        <input type="text" id="node-input-inactivateDelay" style="text-align:end; width:50px !important">
+        <select id="node-input-inactivateDelayUnit" style="width:170px !important">
+            <option value="milliseconds">milliseconds</option>
+            <option value="seconds">seconds</option>
+            <option value="minutes">minutes</option>
+            <option value="hours">hours</option>
+            <option value="days">days</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-seperated"> &nbsp;</label>
+        <input type="checkbox" id="node-input-seperated" style="display:inline-block; width:15px; vertical-align:baseline;" autocomplete="off">
+        <span><i class="fa fa-random"></i> Seperated outputs</span>
+        <input type="hidden" id="node-input-outputs" value="1">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="lower-case">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>
