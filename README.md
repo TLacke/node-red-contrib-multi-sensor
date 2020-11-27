@@ -21,6 +21,10 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 <a name="usage"></a>
 ## Usage
 
+![node-explain](assets/explain_large.png "Node explaination")
+To give a glimse on how the node works, we can take a look at this.
+
+
 <a name="node_configuration"></a>
 ### Node Configuration
 The node configuration sets the active on/off/toggle keywords as well as optional topic names.
@@ -84,11 +88,11 @@ Initially it shows no state.
 <a name="example1"></a>
 ### Example 1: Basic usage
 This example shows the basic usage.  
-The configuration is set to **boolean** `true` resp. `false` to switch on resp. switch off and **no toggle option**.
+The configuration simulates two different sensors and gives you the option to manually activate and deactive the sensors to try out the functionality.
 
-<img src="assets/usage-basic.png" title="Example 1" width="550" />
+<img src="assets/example-1.png" title="Example 1" width="537" />
 
-[**BasicUsage.json**](examples/BasicUsage.json)  
+[**example-1.json**](examples/example-1.json)  
 **Fig. 4:** Basic usage example
 
 
