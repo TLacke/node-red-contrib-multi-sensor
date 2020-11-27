@@ -35,12 +35,12 @@ These states matches the structure:
  `{"id":x, "name":name}`
 
 The different id's are:
-* 0.   Inactive
-* 1.   Active
-* 2.   Activating
-* 3.   Deactivating
-* 130. Abort activation
-* 131. Abort deactivation
+* 0: Inactive
+* 1: Active
+* 2: Activating
+* 3: Deactivating
+* 130: Abort activation
+* 131: Abort deactivation
 
 <a name="node_configuration"></a>
 ### Node Configuration
