@@ -81,42 +81,14 @@ You can here choose if to directly send the message when activated/deactivated, 
 #### Seperated outputs
 If checked, there will be a different channel for the deactivation messages. Otherwise, if unchecked, the activation and deactivation messages will be sent through the same output channel.
 
-<a name="input"></a>
-### Input
-The input `msg.payload` contains the **execution command** to the node.  
-The value needs to be identical to the values you configured in the configuration dialog.
-
-If a (string) value is set to the configuration attributes ***On/Off topic*** or ***Toggle topic***, the `msg.topic` property must contain the same string value to execute the command given in `msg.payload`.
-
-An example `msg` contents is shown for ***On/Off topic*** = "onofftopic":
-
-![node-settings](assets/topic-usage.png "Use of topics")  
-**Fig. 3:** Example `msg` when using topics
-
-
-<a name="output"></a>
-### Output
-The input `msg` is forwarded to the output, if a valid switch command was detected.  
-The configuration attribute ***pass through ON/OFF messages*** is taken into account.
-
-These attributes can be of type
-* string
-* number
-* boolean
-
-
 ### Node status
-The node status signals:
-- If the switch status is ***on*** it shows a green dot with the text **ON**.
-- If the switch status is ***off*** it shows a red dot with the text **OFF**.
-
-Initially it shows no state.
-
+The node has a default status behavior that will explain the number of found sensors as well as current state (active, inactive or pending by delay).
+The status can be overridden by usage of the `msg.status` field.
 
 <a name="examples"></a>
 ## Examples
 ***
-**Remark**: Example flows are present in the examples subdirectory. In Node-RED they can be imported via the import function and then selecting *Examples* in the vertical tab menue.
+**Remark**: Example flows are present in the examples subdirectory. In Node-RED they can be imported via the import function and then selecting *Examples* in the vertical tab menu.
 ***
 
 <a name="example1"></a>
