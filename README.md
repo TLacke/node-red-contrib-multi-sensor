@@ -92,26 +92,9 @@ The configuration is set to **boolean** `true` resp. `false` to switch on resp. 
 **Fig. 4:** Basic usage example
 
 
-<a name="example2"></a>
-### Example 2: Usage with topics
-This example shows the usage of topics.  
-The configuration is set to **strings** (`switchON`, `switchOFF`) to switch on resp. off and a **string** (`toggleSTATE`) to toggle the switch.  
-Additionally, the topics are set to `onofftopic` (for the commands `switchON` and `switchOFF`) and to `toggletopic` for the toggle operation (command `toggleSTATE`).
-
-<img src="assets/usage-with-topic.png" title="Example 2" width="600" />
-
-[**TopicUsage.json**](examples/TopicUsage.json)  
-**Fig. 5:** Topic usage example
-
-
 
 ## Version history
-v0.1.0 Docu rework
-
-v0.0.2 Docs updated
-
-v0.0.1 Initial release
+v0.1.0 Initial release
 
 ## Credits
-- [eschava](https://github.com/eschava)
-- [StephanStS](https://github.com/StephanStS)
+- [TLacke](https://github.com/TLacke)
