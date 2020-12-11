@@ -3,7 +3,7 @@ Binary motion sensor and activation state machine node for Node-red.
 
 This node is a companion for any binary sensor (physical or virtual), storing all recieved sensors and their state and merge them into a single node.
 
-![node-appearance](assets/node-appearance.png "Node appearance")  
+![node-appearance](assets/ms_node-appearance.png "Node appearance")  
 **Fig. 1:** Node appearance
 
 <a name="installation"></a>
@@ -21,13 +21,13 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 <a name="usage"></a>
 ## Usage
 
-![node-explain](assets/explain_large.png "Node explaination")
+![node-explain](assets/ms_explain_large.png "Node explaination")
 **Fig. 3:** Node explaination
 To give an understanding on how the node works, we can take a look at this where you have three sensors that will enter a registration object that will store data about all sensors. Then it continues to check if any changes has been made to the state, if so, we check if we're active or inactive.
 We need to ensure that the opposite timer is reset (if we use one).
 This flow is merged down into a single node to ease and speed up the view.
 
-![node-appearance](assets/node-appearance.png "Node appearance")  
+![node-appearance](assets/ms_node-appearance.png "Node appearance")  
 **Fig. 1:** Node appearance
 The node has two or three output channels *(by default, it uses two)*.
 The last output channel here is the "status" channel, this one informs about the current state.
@@ -46,7 +46,7 @@ The different id's are:
 ### Node Configuration
 The node configuration sets up how the sensor should react.
 
-![node-settings](assets/node-settings.png "Node properties")  
+![node-settings](assets/ms_node-settings.png "Node properties")  
 **Fig. 2:** Node properties
 
 #### Name (optional)
@@ -96,7 +96,7 @@ The status can be overridden by usage of the `msg.status` field.
 This example shows the basic usage.  
 The configuration simulates two different sensors and gives you the option to manually activate and deactive the sensors to try out the functionality.
 
-<img src="assets/example-1.png" title="Example 1" width="537" />
+<img src="assets/ms_example-1.png" title="Example 1" width="537" />
 
 [**example-1.json**](examples/example-1.json)  
 **Fig. 4:** Basic usage example

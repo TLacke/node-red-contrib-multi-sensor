@@ -30,6 +30,8 @@ module.exports = function(RED) {
         var customStatus;
         var origMsg;
 
+        var txtStatus = " " + RED._("status");
+
         function get(id, noCreate) {
             var s = sensors.find(function(s) { return s.id==id; });
             if (!s && !noCreate) {
@@ -153,7 +155,7 @@ module.exports = function(RED) {
                     var c = active?"green":"red";
                     if (node.activeTimer!=-1 || node.inactiveTimer!=-1)
                         c = "yellow";
-                    node.status({fill:c,shape:"dot",text:countActive() + " of " + sensors.length + " sensors active."});
+                    node.status({fill:c,shape:"dot",text:countActive() + " / " + sensors.length + txtStatus});
                 } else
                     node.status(customStatus);
             } catch(e) {
@@ -177,7 +179,9 @@ module.exports = function(RED) {
                 s.active = true;
                 // If first active, then
                 if (a==0) {
-                    origMsg = msg;
+                    if (sendOnInactiveType=='pay')
+                        origMsg = RED.util.cloneMessage(msg);
+                    
                     sendOnActive(msg);
                 }
                 

@@ -1,7 +1,39 @@
 {
-    "trigger" : {
-        "output" : {
-            "nothing": "This is my first message",
+    "name": "multiSensor",
+    "status": "active sensors",
+
+    "label": {
+        "name": "Name:",
+        "id": "Identifier:",
+        "input": "Input:",
+        "onActive":"Activate on:",
+        "onInactive":"Deactive on:",
+        "sendOnActive":"Send on active:",
+        "sendOnInactive":"Send on inactive:",
+        "activeDelay":"Activate delay:",
+        "inactiveDelay":"Deactivate delay:",
+        "seperateOutputs":"Seperated outputs",
+
+        "time":{
+            "ms": "milliseconds",
+            "s": "seconds",
+            "m": "minutes",
+            "h": "hours",
+            "d": "days"
         }
+    },
+    "text": {
+        "name": "Name"
+    },
+    "channel": {
+        "active": "Active channel",
+        "output": "Output channel",
+        "inactive": "Inactive channel",
+        "status": "Status channel"
+    },
+    "opt": {
+        "nul": "Nothing",
+        "pay": "Original message",
+        "payl": "Latest message"
     }
 }

@@ -1,3 +1,77 @@
+<script type="text/html" data-template-name="multiSensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]text.name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-idField" data-i18n="label.id"></label>
+        <input type="text" id="node-input-idField" style="width:70%">
+        <input type="hidden" id="node-input-idType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-inputValue" data-i18n="label.input"></label>
+        <input type="text" id="node-input-inputValue" style="width:70%">
+        <input type="hidden" id="node-input-inputType">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-activeValue" data-i18n="label.onActive"></label>
+        <input type="text" id="node-input-activeValue" style="width:70%">
+        <input type="hidden" id="node-input-activeType">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-inactiveValue" data-i18n="label.onInactive"></label>
+        <input type="text" id="node-input-inactiveValue" style="width:70%">
+        <input type="hidden" id="node-input-inactiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-sendOnActive" data-i18n="label.sendOnActive"></label>
+        <input type="text" id="node-input-sendOnActive" style="width:70%">
+        <input type="hidden" id="node-input-sendOnActiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-sendOnInactive" data-i18n="label.sendOnInactive"></label>
+        <input type="text" id="node-input-sendOnInactive" style="width:70%">
+        <input type="hidden" id="node-input-sendOnInactiveType">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-activateDelay"><i class="fa fa-clock-o"></i> <span data-i18n="label.activeDelay"></span></label>
+        <input type="text" id="node-input-activateDelay" style="text-align:end; width:50px !important">
+        <select id="node-input-activateDelayUnit" style="width:170px !important">
+            <option value="milliseconds" data-i18n="label.time.ms"></option>
+            <option value="seconds" data-i18n="label.time.s"></option>
+            <option value="minutes" data-i18n="label.time.m"></option>
+            <option value="hours" data-i18n="label.time.h"></option>
+            <option value="days" data-i18n="label.time.d"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-inactivateDelay"><i class="fa fa-clock-o"></i> <span data-i18n="label.inactiveDelay"></span></label>
+        <input type="text" id="node-input-inactivateDelay" style="text-align:end; width:50px !important">
+        <select id="node-input-inactivateDelayUnit" style="width:170px !important">
+            <option value="milliseconds" data-i18n="label.time.ms"></option>
+            <option value="seconds" data-i18n="label.time.s"></option>
+            <option value="minutes" data-i18n="label.time.m"></option>
+            <option value="hours" data-i18n="label.time.h"></option>
+            <option value="days" data-i18n="label.time.d"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-seperated"> &nbsp;</label>
+        <input type="checkbox" id="node-input-seperated" style="display:inline-block; width:15px; vertical-align:baseline;" autocomplete="off">
+        <span><i class="fa fa-random"></i> <span data-i18n="label.seperateOutputs"></span></span>
+        <input type="hidden" id="node-input-outputs" value="1">
+    </div>
+</script>
+
 <script type="text/javascript">
     RED.nodes.registerType('multiSensor',{
         category: 'function',
@@ -28,22 +102,22 @@
         outputLabels: function(index) {
             var o = this.outputs == 3;
             switch (index) {
-                case 0: return o ? "Active channel" : "Output channel";
-                case 1: return o ? "Inactive channel" : "Status channel";
-                case 2: return "Status channel";
+                case 0: return o ? this._("channel.active") : this._("channel.output");
+                case 1: return o ? this._("channel.inactive") : this._("channel.status");
+                case 2: return this._("channel.status");
             }
         },
         icon: "trigger.png",
         label: function() {
-            return this.name||"multiSensor";
+            return this.name||this._("name");
         },
 
         oneditprepare: function() {
             var outputCount = $("#node-input-outputs").val("{}");
 
-            var optionNothing = {value:"nul",label:"Nothing",hasValue:false};
-            var optionOriginalMsg = {value:"pay",label:"Original message",hasValue:false};
-            var optionLatestMsg = {value:"payl",label:"Latest message",hasValue:false};
+            var optionNothing = {value:"nul",label:this._("opt.nul"),hasValue:false};
+            var optionOriginalMsg = {value:"pay",label:this._("opt.pay"),hasValue:false};
+            var optionLatestMsg = {value:"payl",label:this._("opt.payl"),hasValue:false};
             
             $("#node-input-idField").typedInput({
                 type:"msg",
@@ -108,82 +182,4 @@
         oneditsave: function() {
         }
     });
-</script>
-
-<script type="text/html" data-template-name="multiSensor">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-idField" data-i18n="multiSensor.label.id">Identifier:</label>
-        <input type="text" id="node-input-idField" style="width:70%">
-        <input type="hidden" id="node-input-idType">
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-inputValue" data-i18n="multiSensor.label.input">Input:</label>
-        <input type="text" id="node-input-inputValue" style="width:70%">
-        <input type="hidden" id="node-input-inputType">
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-activeValue" data-i18n="multiSensor.label.onActive">Activate on:</label>
-        <input type="text" id="node-input-activeValue" style="width:70%">
-        <input type="hidden" id="node-input-activeType">
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-inactiveValue" data-i18n="multiSensor.label.onDeactivate">Deactive on:</label>
-        <input type="text" id="node-input-inactiveValue" style="width:70%">
-        <input type="hidden" id="node-input-inactiveType">
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-sendOnActive" data-i18n="multiSensor.label.sendOnActive">Send on active:</label>
-        <input type="text" id="node-input-sendOnActive" style="width:70%">
-        <input type="hidden" id="node-input-sendOnActiveType">
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-sendOnInactive" data-i18n="multiSensor.label.sendOnInactive">Send on inactive:</label>
-        <input type="text" id="node-input-sendOnInactive" style="width:70%">
-        <input type="hidden" id="node-input-sendOnInactiveType">
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-activateDelay"><i class="fa fa-clock-o"></i> <span data-i18n="multiSensor.label.activeDelay">Activate delay:</span></label>
-        <input type="text" id="node-input-activateDelay" style="text-align:end; width:50px !important">
-        <select id="node-input-activateDelayUnit" style="width:170px !important">
-            <option value="milliseconds">milliseconds</option>
-            <option value="seconds">seconds</option>
-            <option value="minutes">minutes</option>
-            <option value="hours">hours</option>
-            <option value="days">days</option>
-        </select>
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-inactivateDelay"><i class="fa fa-clock-o"></i> Deactivate delay:</label>
-        <input type="text" id="node-input-inactivateDelay" style="text-align:end; width:50px !important">
-        <select id="node-input-inactivateDelayUnit" style="width:170px !important">
-            <option value="milliseconds">milliseconds</option>
-            <option value="seconds">seconds</option>
-            <option value="minutes">minutes</option>
-            <option value="hours">hours</option>
-            <option value="days">days</option>
-        </select>
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-seperated"> &nbsp;</label>
-        <input type="checkbox" id="node-input-seperated" style="display:inline-block; width:15px; vertical-align:baseline;" autocomplete="off">
-        <span><i class="fa fa-random"></i> Seperated outputs</span>
-        <input type="hidden" id="node-input-outputs" value="1">
-    </div>
-</script>
-
-<script type="text/html" data-help-name="lower-case">
-    <p>A simple node that converts the message payloads into all lower-case characters</p>
 </script>

@@ -1,8 +1,7 @@
 {
     "name": "node-red-multi-sensor",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "A Node-RED multiple binary-sensor linker",
-    "main": "multiSensor.js",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/TLacke/node-red-multi-sensor.git"
@@ -17,7 +16,7 @@
     ],
     "node-red": {
         "nodes": {
-            "multiSensor": "multiSensor.js"
+            "multiSensor": "multiSensor.js",
         }
     },
     "bugs": {
