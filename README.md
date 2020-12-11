@@ -22,13 +22,15 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 ## Usage
 
 ![node-explain](assets/ms_explain_large.png "Node explaination")
-**Fig. 3:** Node explaination
+
+**Fig. 2:** Node explaination
 To give an understanding on how the node works, we can take a look at this where you have three sensors that will enter a registration object that will store data about all sensors. Then it continues to check if any changes has been made to the state, if so, we check if we're active or inactive.
 We need to ensure that the opposite timer is reset (if we use one).
 This flow is merged down into a single node to ease and speed up the view.
 
 ![node-appearance](assets/ms_node-appearance.png "Node appearance")  
-**Fig. 1:** Node appearance
+**Fig. 3:** Node appearance
+
 The node has two or three output channels *(by default, it uses two)*.
 The last output channel here is the "status" channel, this one informs about the current state.
 These states matches the structure:
@@ -47,7 +49,7 @@ The different id's are:
 The node configuration sets up how the sensor should react.
 
 ![node-settings](assets/ms_node-settings.png "Node properties")  
-**Fig. 2:** Node properties
+**Fig. 4:** Node properties
 
 #### Name (optional)
 *(Optional)* The name of this node. *(Will change the content of the node to the name)*
@@ -99,11 +101,12 @@ The configuration simulates two different sensors and gives you the option to ma
 <img src="assets/ms_example-1.png" title="Example 1" width="537" />
 
 [**example-1.json**](examples/example-1.json)  
-**Fig. 4:** Basic usage example
+**Fig. 5:** Basic usage example
 
 
 
 ## Version history
+v1.0.0 Completed documentation and translations
 v0.1.0 Initial release
 
 ## Credits
