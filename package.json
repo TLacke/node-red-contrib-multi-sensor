@@ -16,7 +16,7 @@
     ],
     "node-red": {
         "nodes": {
-            "multiSensor": "multiSensor.js",
+            "multiSensor": "multiSensor.js"
         }
     },
     "bugs": {
