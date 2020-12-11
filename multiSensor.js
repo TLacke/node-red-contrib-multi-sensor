@@ -121,10 +121,13 @@ module.exports = function(RED) {
             return id;
         }
 
-        function getData(value, type, msg) {
+        function getData(value, type, msg, useLastOrig) {
+            if (useLastOrig===true && type=='pay')
+                type = 'payl';
+            
             switch (type) {
-                case "pay":     return origMsg;
                 case "payl":    return msg;
+                case "pay":     return origMsg;
                 case "nul":     return undefined;
                 default:        return RED.util.evaluateNodeProperty(value, type, node, msg);
             }
@@ -136,12 +139,11 @@ module.exports = function(RED) {
 
             if (isActive) {
                 if (config.sendOnActiveType == "nul") return;
-                msg = getData(config.sendOnActive, config.sendOnActiveType, msg);
+                msg = getData(config.sendOnActive, config.sendOnActiveType, msg, true);
             } else {
                 if (config.sendOnInactiveType == "nul") return;
                 msg = getData(config.sendOnInactive, config.sendOnInactiveType, msg);
             }
-
             if (config.seperated == true) {
                 node.send([isActive?msg:undefined, isActive?undefined:msg, state(isActive?STATUS_ACTIVE:STATUS_INACTIVE, true)]);
             }
@@ -179,8 +181,9 @@ module.exports = function(RED) {
                 s.active = true;
                 // If first active, then
                 if (a==0) {
-                    if (sendOnInactiveType=='pay')
+                    if (config.sendOnInactiveType=='pay') {
                         origMsg = RED.util.cloneMessage(msg);
+                    }
                     
                     sendOnActive(msg);
                 }
