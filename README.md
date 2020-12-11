@@ -22,8 +22,8 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 ## Usage
 
 ![node-explain](assets/ms_explain_large.png "Node explaination")
-
 **Fig. 2:** Node explaination
+
 To give an understanding on how the node works, we can take a look at this where you have three sensors that will enter a registration object that will store data about all sensors. Then it continues to check if any changes has been made to the state, if so, we check if we're active or inactive.
 We need to ensure that the opposite timer is reset (if we use one).
 This flow is merged down into a single node to ease and speed up the view.
