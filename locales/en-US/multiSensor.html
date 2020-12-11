@@ -1,0 +1,93 @@
+<script type="text/html" data-help-name="multiSensor">
+<p>
+Binary motion sensor and activation state machine node for Node-red.
+
+This node is a companion for any binary sensor (physical or virtual), storing all recieved sensors and their state and merge them into a single node.
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+	<dt class="optional">Name</dt>
+	<dd>The name of this node. <i>(Will reflect what's shown on the node.)</i>
+	</dd>
+
+
+	<dt>Identifier<span class="property-type">msg.[] | flow.[] | global.[]</span></dt>
+	<dd>The data field that should be used to uniquely identify a sensor.
+	Each sensor should have their own unique identifier that this node can use as an id to differentiate it from each other.
+	</dd>
+
+	<dt>Input<span class="property-type">msg.[] | flow.[] | global.[] | env. variable</span></dt>
+	<dd>The value to read and validate against the <code><b>Activate on</code></b> and <code><b>Deactivate on</code></b> values.
+	<ul>
+	<li>If the input value doesn't match any of the two values, it will be ignored.</li>
+	<li>If matches the <code><b>Activate on</code></b> value, it will use the <code><b>Identifier</code></b> to create a record with an active flag.</li>
+	<li>If matches the <code><b>Deactivate on</code></b> value, it will try to find an already created record with the current <code><b>Identifier</code></b> to deactivate the flag.</li>
+	</ul>
+	</dd>
+
+	<dt>Activate on</dt>
+	<dd>The <b><code>input</code></b> value needs to match this field trigger an activation of the identified binary sensor.
+	</dd>
+
+	<dt>Deactivate on</dt>
+	<dd>The <b><code>input</code></b> value needs to match this field trigger an deactivation of the identified binary sensor.
+	</dd>
+
+	<dt>Send on active</dt>
+	<dd>As soon as activation of this node is triggered, it will trigger a sending of the specified data through.
+	It will be sent either directly or when <code><b>Activate delay</code></b> time has passed <i>(If not being deactivated before, then the activation will be canceled out)</i>.
+	</dd>
+
+	<dt>Send on inactive</dt>
+	<dd>As soon as all inputs has been deactivated, the deactivation of this node is triggered, it will trigger a sending of the specified data through.
+	It will be sent either directly or when <code><b>Deactivate delay</code></b> time has passed <i>(If not a sensor is being activated again, then the deactivation will be canceled out)</i>.
+	</dd>
+
+	<dt>Activate delay<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
+	<dd>The activate delay will enable a latency between the actual event and the message being sent.
+	You can here choose if to directly send the message when activated, or wait a specified amount.
+	</dd>
+
+	<dt>Deactivate delay<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
+	<dd>The delays are there to enable a latency between the actual event and the message being sent.
+	You can here choose if to directly send the message when deactivated, or wait a specified amount.
+	</dd>
+
+	<dt>Seperated outputs</dt>
+	<dd>If checked, there will be a different channel for the deactivation messages.<br>
+	Otherwise <i>(if unchecked)</i>, the activation and deactivation messages will be sent through the same output channel.
+	</dd>
+</dl>
+
+<h3>Details</h3>
+<p>The sensor works by connecting multiple binary state handlers (binary sensors or likewise) to this node. The node will register each entity by using the specified <b>Identifier</b> and hold its state.
+When any of the binary input goes on, this node will activate and stay there until all of the active inputs has sent an inactive signal.
+</p>
+
+<p>The node has two or three output channels <i>(by default, it uses two)</i>.
+The last output channel here is the <b>"status"</b> channel, this one informs about the current state.
+These states matches the structure:<br>
+ <code>{"id":x, "name":name}</code>
+</p>
+
+The different id's are:
+<ul>
+  <li><code>0</code>: Inactive</li>
+  <li><code>1</code>: Active</li>
+  <li><code>2</code>: Activating</li>
+  <li><code>3</code>: Deactivating</li>
+  <li><code>130</code>: Abort activation</li>
+  <li><code>131</code>: Abort deactivation</li>
+</ul>
+
+<p><b>Node status</b>
+The node has a default status behavior that will explain the number of found sensors as well as current state (active, inactive or pending by delay).
+The status can be overridden by usage of the `<code>msg.status</code>` field.<br>
+It should use the default node status format. <i>(eg. <code>{fill:'dot',text:'message'}</code>)</i>
+</p>
+
+<h3>References</h3>
+    <ul>
+     <li><a href="https://github.com/TLacke/node-red-multi-sensor">GitHub</a> - GitHub repository</li>
+    </ul>
+</script>
