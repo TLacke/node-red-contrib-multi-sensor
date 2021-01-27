@@ -41,6 +41,8 @@ The different id's are:
 * 1: Active
 * 2: Activating
 * 3: Deactivating
+* 65: Timeout
+* 66: Reset
 * 130: Abort activation
 * 131: Abort deactivation
 
@@ -78,10 +80,25 @@ The data specified in this field will then be sent, either directly or when **De
 
 #### Activate delay / Deactivate delay
 The delays are there to enable a latency between the actual event and the message being sent.
-You can here choose if to directly send the message when activated/deactivated, or wait a specified amount.
+You can here choose if to directly send the message when activated/deactivated _(set to zero)_, or wait a specified amount.
+
+#### Sensor timeout
+The time to wait when a sensor getting active before automatically deactivate it.
+*(Zero, means no timeout.)*
+
+#### Active timeout
+The time to wait when the node getting active before automatically deactivate it and all its active sensors.
+*(Zero, means no timeout.)*
 
 #### Seperated outputs
 If checked, there will be a different channel for the deactivation messages. Otherwise, if unchecked, the activation and deactivation messages will be sent through the same output channel.
+
+### Node reset
+There's two different reset models implemented:
+* **soft**: Will deactivate any active sensor and return to idle state with or without delays as configured.
+* **hard**: Will force a direct deactivation of all active sensors and return to idle state without any delays.
+
+To use this, you can send the *`msg.reset='soft'` *(or actually anything other than false or 'hard')* to make a soft reset. or `emsg.reset='hard'` to make a hard reset.
 
 ### Node status
 The node has a default status behavior that will explain the number of found sensors as well as current state (active, inactive or pending by delay).

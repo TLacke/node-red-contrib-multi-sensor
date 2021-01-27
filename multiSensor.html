@@ -41,6 +41,12 @@
     </div>
     
     <div class="form-row">
+        <label for="node-input-sendOnTimeout" data-i18n="label.sendOnTimeout"></label>
+        <input type="text" id="node-input-sendOnTimeout" style="width:70%">
+        <input type="hidden" id="node-input-sendOnTimeoutType">
+    </div>
+    
+    <div class="form-row">
         <label for="node-input-activateDelay"><i class="fa fa-clock-o"></i> <span data-i18n="label.activeDelay"></span></label>
         <input type="text" id="node-input-activateDelay" style="text-align:end; width:50px !important">
         <select id="node-input-activateDelayUnit" style="width:170px !important">
@@ -62,6 +68,36 @@
             <option value="hours" data-i18n="label.time.h"></option>
             <option value="days" data-i18n="label.time.d"></option>
         </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sTimeout"><i class="fa fa-hourglass-end"></i> <span data-i18n="label.sTimeout"></span></label>
+        <label style="vertical-align:middle;white-space:nowrap">
+        <input type="text" id="node-input-sTimeout" style="text-align:end; width:50px !important">
+        <select id="node-input-sTimeoutUnit" style="width:170px !important">
+            <option value="milliseconds" data-i18n="label.time.ms"></option>
+            <option value="seconds" data-i18n="label.time.s"></option>
+            <option value="minutes" data-i18n="label.time.m"></option>
+            <option value="hours" data-i18n="label.time.h"></option>
+            <option value="days" data-i18n="label.time.d"></option>
+        </select>
+        <br><span style="font-style:italic;color:red" data-i18n="label.timeoutExplain"></span>
+        </label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-aTimeout"><i class="fa fa-hourglass-end"></i> <span data-i18n="label.aTimeout"></span></label>
+        <label style="vertical-align:middle;white-space:nowrap">
+        <input type="text" id="node-input-aTimeout" style="text-align:end; width:50px !important">
+        <select id="node-input-aTimeoutUnit" style="width:170px !important">
+            <option value="milliseconds" data-i18n="label.time.ms"></option>
+            <option value="seconds" data-i18n="label.time.s"></option>
+            <option value="minutes" data-i18n="label.time.m"></option>
+            <option value="hours" data-i18n="label.time.h"></option>
+            <option value="days" data-i18n="label.time.d"></option>
+        </select>
+        <br><span style="font-style:italic;color:red" data-i18n="label.timeoutExplain"></span>
+        </label>
     </div>
 
     <div class="form-row">
@@ -94,6 +130,12 @@
             sendOnActive: {value:undefined, validate: RED.validators.typedInput("sendOnActiveType")},
             sendOnInactiveType: {value:"payl"},
             sendOnInactive: {value:undefined, validate: RED.validators.typedInput("sendOnInactiveType")},
+            sendOnTimeoutType: {value:"pay"},
+            sendOnTimeout: {value:undefined, validate: RED.validators.typedInput("sendOnTimeoutType")},
+            aTimeout: {value: "0", required: true, validate: function(v) { return v==undefined || RED.validators.number();} },
+            aTimeoutUnit: {value:"minutes"},
+            sTimeout: {value: "0", required: true, validate: function(v) { return v==undefined || RED.validators.number();} },
+            sTimeoutUnit: {value:"minutes"},
             seperated: {value:false},
             outputs: {value:2}
         },
@@ -159,6 +201,33 @@
                 ],
                 typeField: "#node-input-sendOnInactiveType"
             });
+
+            $("#node-input-sendOnTimeout").typedInput({
+                types:['msg','flow','global','str','num','bool',"jsonata",'json','bin','date','env',
+                    optionOriginalMsg,
+                    optionLatestMsg,
+                    optionNothing
+                ],
+                typeField: "#node-input-sendOnTimeoutType"
+            });
+
+            var to = $("#node-input-sTimeout");
+            to.spinner({min: 0});
+            
+            // If not set (updated), then update it
+            if (to.val()=='') {
+                to.val('0');
+                $("#node-input-sTimeoutUnit").val('minutes');
+            }
+            
+            var to = $("#node-input-aTimeout");
+            to.spinner({min: 0});
+
+            // If not set (updated), then update it
+            if (to.val()=='') {
+                to.val('0');
+                $("#node-input-aTimeoutUnit").val('minutes');
+            }
 
             var sepValue = this.outputs == 3;
             $("#node-input-seperated").prop('checked', (this.outputs == 3));

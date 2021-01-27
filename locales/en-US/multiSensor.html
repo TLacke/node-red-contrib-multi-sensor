@@ -45,12 +45,22 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 
 	<dt>Activate delay<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
 	<dd>The activate delay will enable a latency between the actual event and the message being sent.
-	You can here choose if to directly send the message when activated, or wait a specified amount.
+	You can here choose if to directly send the message when activated <i>(set to zero)</i>, or wait a specified amount.
 	</dd>
 
 	<dt>Deactivate delay<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
 	<dd>The delays are there to enable a latency between the actual event and the message being sent.
-	You can here choose if to directly send the message when deactivated, or wait a specified amount.
+	You can here choose if to directly send the message when deactivated <i>(set to zero)</i>, or wait a specified amount.
+	</dd>
+
+	<dt>Sensor timeout<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
+	<dd>The time to wait when a sensor getting active before automatically deactivate it.
+	<i>(Zero, means no timeout.)</i>
+	</dd>
+
+	<dt>Active timeout<span class="property-type">milliseconds | seconds | minutes | hours | days</span></dt>
+	<dd>The time to wait when the node getting active before automatically deactivate it and all its active sensors.
+	<i>(Zero, means no timeout.)</i>
 	</dd>
 
 	<dt>Seperated outputs</dt>
@@ -76,9 +86,20 @@ The different id's are:
   <li><code>1</code>: Active</li>
   <li><code>2</code>: Activating</li>
   <li><code>3</code>: Deactivating</li>
+  <li><code>65</code>: Timeout</li>
+  <li><code>66</code>: Reset</li>
   <li><code>130</code>: Abort activation</li>
   <li><code>131</code>: Abort deactivation</li>
 </ul>
+
+<p><b>Node reset</b>
+There's two different reset models implemented:
+<ul>
+ <li><code>soft</code>: Will deactivate any active sensor and return to idle state with or without delays as configured.
+ <li><code>hard</code>: Will force a direct deactivation of all active sensors and return to idle state without any delays.
+ </ul>
+ To use this, you can send the `<code>msg.reset='soft'</code>` <i>(or actually anything other than false or 'hard')</i> to make a soft reset. or `<code>msg.reset='hard'</code>` to make a hard reset.
+</p>
 
 <p><b>Node status</b>
 The node has a default status behavior that will explain the number of found sensors as well as current state (active, inactive or pending by delay).

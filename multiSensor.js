@@ -3,209 +3,294 @@ module.exports = function(RED) {
     var STATUS_ACTIVE = {id:1,name:"active"};
     var STATUS_ACTIVATING = {id:2,name:"activating"};
     var STATUS_DEACTIVATING = {id:3,name:"deactivating"};
+    var STATUS_TIMEOUT = {id:65,name:"timeout"};
+    var STATUS_RESET = {id:66,name:"reset"};
     var STATUS_CANCEL_ACT = {id:130,name:"abortActivation"};
     var STATUS_CANCEL_DEACT = {id:131,name:"abortDeactivation"};
+
+    function getTime(v,t) {
+        if (v==undefined || t==undefined) return 0;
+
+        if (t === "milliseconds") return v;
+        else if (t === "minutes") return v * (60 * 1000);
+        else if (t === "hours")   return v * (60 * 60 * 1000);
+        else if (t === "days")    return v * (24 * 60 * 60 * 1000);
+        else return v * 1000;
+    }
 
     function SensorNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
 
-        if (config.activateDelayUnit === "milliseconds") this.activeDelay = config.activateDelay;
-        else if (config.activateDelayUnit === "minutes") this.activeDelay = config.activateDelay * (60 * 1000);
-        else if (config.activateDelayUnit === "hours")   this.activeDelay = config.activateDelay * (60 * 60 * 1000);
-        else if (config.activateDelayUnit === "days")    this.activeDelay = config.activateDelay * (24 * 60 * 60 * 1000);
-        else this.activeDelay = config.activateDelay * 1000;
+        var tActive = getTime(config.activateDelay, config.activateDelayUnit);
+        var tInactive = getTime(config.inactivateDelay, config.inactivateDelayUnit);
+        var tSensor = getTime(config.sTimeout, config.sTimeoutUnit);
+        var tMain = getTime(config.aTimeout, config.aTimeoutUnit);
 
-        if (config.inactivateDelayUnit === "milliseconds") this.inactiveDelay = config.inactivateDelay;
-        else if (config.inactivateDelayUnit === "minutes") this.inactiveDelay = config.inactivateDelay * (60 * 1000);
-        else if (config.inactivateDelayUnit === "hours")   this.inactiveDelay = config.inactivateDelay * (60 * 60 * 1000);
-        else if (config.inactivateDelayUnit === "days")    this.inactiveDelay = config.inactivateDelay * (24 * 60 * 60 * 1000);
-        else this.inactiveDelay = config.inactivateDelay * 1000;
-        
-        node.activeTimer = -1;
-        node.inactiveTimer = -1;
+        // v=value, t=type
+        const S_NORMAL = {v: config.sendOnInactive, t: config.sendOnInactiveType};
+        const S_TIMEOUT = {v: config.sendOnTimeout, t: config.sendOnTimeoutType};
+        // t=Timeout, d=Direct, s=Status, v:Value data
+        const DA_NORMAL = {t:false,d:false, s:STATUS_INACTIVE, v:S_NORMAL};
+        const DA_TIMEOUT = {t:true,d:false, s:STATUS_TIMEOUT, v:S_TIMEOUT};
+        const DA_TIMEOUT_SENSOR = {t:true,d:false,s:STATUS_TIMEOUT, v:S_TIMEOUT};
+        const DA_RESET = {t:false,d:false,s:STATUS_RESET, v:S_NORMAL};
+        const DA_RESET_HARD = {t:false,d:true,s:STATUS_RESET, v:S_NORMAL};
 
-        var active = false;
         var sensors = [];
+
         var customStatus;
-        var origMsg;
+        var orgMsg,latMsg;
 
         var txtStatus = " " + RED._("status");
 
-        function get(id, noCreate) {
-            var s = sensors.find(function(s) { return s.id==id; });
-            if (!s && !noCreate) {
-                s = {id:id, active:false};
+        function d() {
+            //console.log.apply(null, arguments);
+        }
+
+        var main = {
+            a: false,       // isActive
+            activate: function() {
+                d('Try activate...');
+                if (!aSensor()) return;                 // If no active sensor, abort
+                if (this.cDeactivate()) return;         // If deactivation cancelled, abort
+                if (this.a) return;                     // If already active, abort
+
+                d('Activating...');
+                if (tActive>0) {                        // If time to activate
+                    if (this.hActive)                   // If already lazy active
+                        return;                         // then, Abort
+                    
+                    d('Timeout to active ' + tActive);
+                    orgMsg = latMsg;                    // Update org message before timer to get first.
+                    this.hActive = setTimeout(()=>this.onActivate(), tActive); // Set timeout
+                    state(STATUS_ACTIVATING);
+                } else {
+                    orgMsg = latMsg;                    // Update original message to activation message
+                    this.onActivate();                  // Otherwise, just activate
+                }
+            },
+            onActivate: function() {
+                d('Activated');
+                this.hActive = undefined;               // Reset lazy active timer
+                this.a = true;                          // Set to active
+                
+                var msg = getData(config.sendOnActive, config.sendOnActiveType);
+                state(STATUS_ACTIVE, msg);
+
+                sensors.forEach(s=>s.updTimeout());
+
+                if (tMain>0) {                          // If has main timeout, then set it up
+                    d('Main timeout: ' + tMain);
+                    this.hMain = setTimeout(()=>this.onTimeout(), tMain);
+                }
+            },
+            cActivate: function() {
+                d('Try cancel activation');
+                if (this.hActive) {
+                    d('Cancel activation');
+                    clearTimeout(this.hActive);
+                    this.hActive = undefined;
+                    state(STATUS_CANCEL_ACT);
+                    return true;
+                }
+                return false;
+            },
+            deactivate: function(st) {
+                d('Try deactivate...');
+                if (aSensor()) return;                  // If has active sensor, abort
+                if (this.cActivate()) return;           // Cancel any activation, abort
+                if (!this.a) return;                    // If not active, abort
+                
+                if (st===undefined)
+                    st = DA_NORMAL;
+
+                d('Deactivate...');
+                if (!st.d && tInactive>0) {             // If not direct and has time to deactivate
+                    if (this.hInactive)                 // If not active
+                        return;                         // Abort
+                    
+                    d('Timeout to deactivate ' + tInactive);
+                    this.hInactive = setTimeout(()=>this.onDeactivate(st), tInactive); // Set timeout
+                    state(STATUS_DEACTIVATING);
+                } else
+                    this.onDeactivate(st);              // Otherwise, just deactivate
+            },
+            onDeactivate: function(st) {
+                d('Deactivated');
+                this.hInactive = undefined;             // Reset lazy inactive timer
+                this.a = false;                         // set to inactive
+                
+                clearTimeout(this.hMain);               // Remove any main timeout
+                this.hMain = undefined;
+
+                state(st.s, getData(st.v.v, st.v.t));   // Setting state to specified and attaching correct out data
+            },
+            cDeactivate: function() {
+                d('Try cancel deactivation');
+                if (this.hInactive) {
+                    d('Cancel deactivation');
+                    clearTimeout(this.hInactive);
+                    this.hInactive = undefined;
+
+                    clearTimeout(this.hMain);
+                    this.hMain = undefined;
+                    if (tMain>0)                        // If has main timeout
+                        this.hMain = setTimeout(()=>this.onTimeout(), tMain); // Reset timeout
+
+                    state(STATUS_CANCEL_DEACT);
+                    return true;
+                }
+                return false;
+            },
+            onTimeout: function(st) {
+                d('Main timeout occurred...');
+                if (!this.a) {                          // If active
+                    d('Not active, try cancel activation.');
+                    this.cActivate();
+                }
+                
+                if (st === undefined)
+                    st=DA_TIMEOUT;
+                
+                sensors.forEach(s=>s.deactivate(st));
+            }
+        };
+
+        function get(id, create) {
+            var s = sensors.find(function(s) { return s.id==id; }); // Find sensor
+            if (!s && create===true) {  // If no sensor found and allow create
+                s = {id:id,
+                    a:false,
+                    activate: function() {
+                        d('Try activate sensor ' + this.id);
+
+                        if (this.a) {               // If already active
+                            if (tSensor>0)          // If timeout, then update it
+                                this.updTimeout();
+                            
+                            d('Sensor already active');
+                            return;                 // abort
+                        }
+
+                        d('Sensor activated.');
+                        this.a=true;                // Set to active
+                        main.activate();            // Try activate main
+                        
+                        this.updTimeout();
+                        updateStatus();
+                    },
+                    deactivate: function(st) {
+                        d('Try deactivate sensor ' + this.id);
+                        if (!this.a) {              // If not active
+                            d('Already inactive.');
+                            return;                 // abort
+                        }
+                        
+                        clearTimeout(this.ht);      // Clear any timeout
+                        this.ht = undefined;
+
+                        d('Sensor deactivated.');
+                        this.a=false;               // Set to inactive
+                        main.deactivate(st);        // Try deactivate main
+                        updateStatus();
+                    },
+                    updTimeout: function() {
+                        d('Resetting sensor timeout ' + tSensor);
+                        clearTimeout(this.ht);
+                        if (this.a && main.a) {
+                            d('Assign sensor timeout');
+                            this.ht=setTimeout(()=>this.timeOut(), tSensor);
+                        }
+                    },
+                    timeOut: function() {
+                        d('Sensor '+this.id+' timed out.');
+                        this.deactivate(DA_TIMEOUT_SENSOR); // Deactivate on timeout
+                    }
+                };
                 sensors.push(s);
             }
             return s;
         }
 
-        function countActive() {
-            var c = 0;
-            for (var i=sensors.length-1; i>=0; i--)
-                if (sensors[i].active) c++;
+        function aSensor() {
+            return !!sensors.find(s=>s.a);
+        }
+
+        function cSensor() {
+            var c=0;
+            sensors.forEach(s=>s.a && c++);
             return c;
         }
 
-        function abortActive() {
-            if (node.activeTimer==-1) return;
-            clearInterval(node.activeTimer);
-            node.activeTimer = -1;
-            state(STATUS_CANCEL_ACT);
-        }
-
-        function abortInactive() {
-            if (node.inactiveTimer==-1) return;
-            clearInterval(node.inactiveTimer);
-            node.inactiveTimer = -1;
-            state(STATUS_CANCEL_DEACT);
-        }
-
-        function sendOnActive(msg) {
-            // Abort any inactive timer
-            abortInactive();
-
-            // If already active, then
-            if (active)
-                return;
-            
-            var activeDelay = Number.isInteger(msg.activeDelay) ? msg.activeDelay : node.activeDelay;
-
-            if (activeDelay == 0) {
-                doSend(msg, true);
+        function state(id, msg) {
+            if (config.seperated) {
+                var ia = id==STATUS_ACTIVE;
+                node.send([ia?msg:undefined , ia?undefined:msg , id]);
             } else {
-                state(STATUS_ACTIVATING);
-                if (node.activeTimer==-1) {
-                    node.activeTimer = setTimeout(function() {
-                        node.activeTimer = -1;
-                        // If not already been customly activated, then send activate
-                        if (!active)
-                            doSend(msg, true);
-                        
-                    }, activeDelay);
-                }
+                node.send([msg,id]);
             }
-        }
-
-        function sendOnInactive(msg) {
-            // Abort any active timer
-            abortActive();
-
-            // If already inactive, then
-            if (!active)
-                return;
-
-            var inactiveDelay = Number.isInteger(msg.inactiveDelay) ? msg.inactiveDelay : node.inactiveDelay;
-        
-            if (inactiveDelay == 0) {
-                doSend(msg, false);
-            } else {
-                state(STATUS_DEACTIVATING);
-                if (node.inactiveTimer==-1) {
-                    node.inactiveTimer = setTimeout(function() {
-                        node.inactiveTimer = -1;
-                        
-                        // If not already been customly deactivated, then send deactivate
-                        if (active)
-                            doSend(msg, false);
-                        
-                    }, inactiveDelay);
-                }
-            }
-        }
-
-        function state(id, skipSend) {
-            if (!skipSend)
-                node.send(config.seperated ? [undefined,undefined,id] : [undefined,id]);
-            return id;
-        }
-
-        function getData(value, type, msg, useLastOrig) {
-            if (useLastOrig===true && type=='pay')
-                type = 'payl';
             
-            switch (type) {
-                case "payl":    return msg;
-                case "pay":     return origMsg;
-                case "nul":     return undefined;
-                default:        return RED.util.evaluateNodeProperty(value, type, node, msg);
-            }
-        }
-
-        function doSend(msg, isActive) {
-            active = isActive;
             updateStatus();
+        }
 
-            if (isActive) {
-                if (config.sendOnActiveType == "nul") return;
-                msg = getData(config.sendOnActive, config.sendOnActiveType, msg, true);
-            } else {
-                if (config.sendOnInactiveType == "nul") return;
-                msg = getData(config.sendOnInactive, config.sendOnInactiveType, msg);
+        function getData(value, type) {
+            d('Getting data: ' + value + ' (type=' + type + ')');
+            switch (type) {
+                case "payl":    return latMsg;
+                case "pay":     return orgMsg;
+                case "nul":     return undefined;
+                default:        return RED.util.evaluateNodeProperty(value, type, node, latMsg);
             }
-            if (config.seperated == true) {
-                node.send([isActive?msg:undefined, isActive?undefined:msg, state(isActive?STATUS_ACTIVE:STATUS_INACTIVE, true)]);
-            }
-            else
-                node.send([msg, state(isActive?STATUS_ACTIVE:STATUS_INACTIVE, true)]);
         }
 
         function updateStatus() {
             try {
+                d('Updating status');
                 if (customStatus==undefined) {
-                    var c = active?"green":"red";
-                    if (node.activeTimer!=-1 || node.inactiveTimer!=-1)
+                    var c = main.a?"green":"red";
+                    if (main.hActive || main.hInactive)
                         c = "yellow";
-                    node.status({fill:c,shape:"dot",text:countActive() + " / " + sensors.length + txtStatus});
-                } else
+                    node.status({fill:c,shape:"dot",text:cSensor() + " / " + sensors.length + txtStatus});
+                } else {
+                    d('Custom status active.');
                     node.status(customStatus);
+                }
             } catch(e) {
-            node.warn("Invalid msg.status!");
+                node.warn("Invalid msg.status!");
             }
         }
 
         node.on('input', function(msg) {
+            latMsg = msg;
+
             var id = RED.util.evaluateNodeProperty(config.idField, config.idType, node, msg);
             var inputValue = RED.util.evaluateNodeProperty(config.inputValue, config.inputType, node, msg);
             var activeValue = RED.util.evaluateNodeProperty(config.activeValue, config.activeType, node, msg);
             var inactiveValue = RED.util.evaluateNodeProperty(config.inactiveValue, config.inactiveType, node, msg);
             
-            if (inputValue == activeValue) {
-                var s = get(id);
-                var a = countActive();
-                // If same state, then do nothing
-                if (s.active)
-                    return;
+            customStatus = msg.status;
+
+            if (msg.reset!==undefined && msg.reset!=false) {
+                main.onTimeout((msg.reset=='hard')?DA_RESET_HARD:DA_RESET);
                 
-                s.active = true;
-                // If first active, then
-                if (a==0) {
-                    if (config.sendOnInactiveType=='pay') {
-                        origMsg = RED.util.cloneMessage(msg);
-                    }
-                    
-                    sendOnActive(msg);
-                }
+            } else if (inputValue == activeValue) {
+                get(id, true).activate();
                 
             } else if (inputValue == inactiveValue) {
-                var s = get(id, true);
-
-                // If same state, then do nothing
-                if (!s || !s.active)
-                    return;
-                
-                s.active = false;
-                // If nothing active anymore
-                if (countActive()==0)
-                    sendOnInactive(msg);
+                var s = get(id, false);
+                if (s) s.deactivate();
 
             } else {
                 node.debug('Neither active nor inactive');
             }
 
-            customStatus = msg.status;
-            updateStatus();
+            if (customStatus)
+                updateStatus();
+        });
+
+        this.on("close", function() {
+            main.onTimeout(DA_RESET_HARD); // Directly close everything down.
         });
 
         updateStatus();

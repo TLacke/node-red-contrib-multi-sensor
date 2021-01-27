@@ -10,8 +10,12 @@
         "onInactive":"Deactive on:",
         "sendOnActive":"Send on active:",
         "sendOnInactive":"Send on inactive:",
+        "sendOnTimeout":"Send on timeout:",
         "activeDelay":"Activate delay:",
         "inactiveDelay":"Deactivate delay:",
+        "sTimeout":"Sensor timeout:",
+        "aTimeout":"Active timeout:",
+        "timeoutExplain":"(Zero means no timeout.)",
         "seperateOutputs":"Seperated outputs",
 
         "time":{
