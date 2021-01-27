@@ -17,6 +17,7 @@
         "aTimeout":"Active timeout:",
         "timeoutExplain":"(Zero means no timeout.)",
         "seperateOutputs":"Seperated outputs",
+        "useCount":"Send sensor count state",
 
         "time":{
             "ms": "milliseconds",

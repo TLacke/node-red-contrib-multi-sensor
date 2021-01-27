@@ -3,6 +3,7 @@ module.exports = function(RED) {
     var STATUS_ACTIVE = {id:1,name:"active"};
     var STATUS_ACTIVATING = {id:2,name:"activating"};
     var STATUS_DEACTIVATING = {id:3,name:"deactivating"};
+    var STATUS_SENSOR = {id:32,name:"sensor"};
     var STATUS_TIMEOUT = {id:65,name:"timeout"};
     var STATUS_RESET = {id:66,name:"reset"};
     var STATUS_CANCEL_ACT = {id:130,name:"abortActivation"};
@@ -52,7 +53,11 @@ module.exports = function(RED) {
             a: false,       // isActive
             activate: function() {
                 d('Try activate...');
-                if (!aSensor()) return;                 // If no active sensor, abort
+                if (!aSensor())                         // If no active sensor, abort
+                    return;
+                else if (config.useCount)               // If presenting sensor count changes, then
+                    state(STATUS_SENSOR);
+                
                 if (this.cDeactivate()) return;         // If deactivation cancelled, abort
                 if (this.a) return;                     // If already active, abort
 
@@ -98,7 +103,12 @@ module.exports = function(RED) {
             },
             deactivate: function(st) {
                 d('Try deactivate...');
-                if (aSensor()) return;                  // If has active sensor, abort
+                if (aSensor()) {                        // If has active sensor, abort
+                    if (config.useCount)                // If presenting sensor count changes, then
+                        state(STATUS_SENSOR);
+                    
+                    return;
+                }
                 if (this.cActivate()) return;           // Cancel any activation, abort
                 if (!this.a) return;                    // If not active, abort
                 
@@ -224,6 +234,9 @@ module.exports = function(RED) {
         }
 
         function state(id, msg) {
+            if (config.useCount)
+                id = {id:id.id,name:id.name,active:cSensor(),total:sensors.length};
+            
             if (config.seperated) {
                 var ia = id==STATUS_ACTIVE;
                 node.send([ia?msg:undefined , ia?undefined:msg , id]);

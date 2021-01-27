@@ -41,6 +41,7 @@ The different id's are:
 * 1: Active
 * 2: Activating
 * 3: Deactivating
+* 32: Sensor change
 * 65: Timeout
 * 66: Reset
 * 130: Abort activation
@@ -89,6 +90,9 @@ The time to wait when a sensor getting active before automatically deactivate it
 #### Active timeout
 The time to wait when the node getting active before automatically deactivate it and all its active sensors.
 *(Zero, means no timeout.)*
+
+#### Send sensor count state
+If checked, the status channel will include the number of sensors currently active *(this will include counting the active sensors and also include the 32 value (6th bit) sent out, causing some extra traffic)*.
 
 #### Seperated outputs
 If checked, there will be a different channel for the deactivation messages. Otherwise, if unchecked, the activation and deactivation messages will be sent through the same output channel.

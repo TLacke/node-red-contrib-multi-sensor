@@ -63,6 +63,10 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 	<i>(Zero, means no timeout.)</i>
 	</dd>
 
+	<dt>Send sensor count state</dt>
+	<dd>If checked, the status channel will include the number of sensors currently active <i>(this will include counting the active sensors and also include the 32 value (6th bit) sent out, causing some extra traffic)</i>.
+	</dd>
+
 	<dt>Seperated outputs</dt>
 	<dd>If checked, there will be a different channel for the deactivation messages.<br>
 	Otherwise <i>(if unchecked)</i>, the activation and deactivation messages will be sent through the same output channel.
@@ -86,6 +90,7 @@ The different id's are:
   <li><code>1</code>: Active</li>
   <li><code>2</code>: Activating</li>
   <li><code>3</code>: Deactivating</li>
+  <li><code>32</code>: Sensor change</li>
   <li><code>65</code>: Timeout</li>
   <li><code>66</code>: Reset</li>
   <li><code>130</code>: Abort activation</li>
