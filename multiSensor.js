@@ -243,8 +243,8 @@ module.exports = function(RED) {
             }
             
             if (config.seperated) {
-                var ia = id==STATUS_ACTIVE;
-                d('sending seperated message for:',id, msg?'with message':'no message');
+                var ia = id.id==STATUS_ACTIVE.id;
+                d('sending seperated message for:',id, msg?'with message':'no message', ia?"isActive":"notActive");
                 node.send([ia?msg:undefined , ia?undefined:msg , id]);
             } else {
                 d('sending bundled message for:',id, msg?'with message':'no message');
