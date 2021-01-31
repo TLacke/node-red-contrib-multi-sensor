@@ -1,6 +1,6 @@
 {
     "name": "node-red-multi-sensor",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "A Node-RED multiple binary-sensor linker",
     "repository": {
         "type": "git",

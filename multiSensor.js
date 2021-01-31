@@ -176,8 +176,7 @@ module.exports = function(RED) {
                         d('Try activate sensor ' + this.id);
 
                         if (this.a) {               // If already active
-                            if (tSensor>0)          // If timeout, then update it
-                                this.updTimeout();
+                            this.updTimeout();
                             
                             d('Sensor already active');
                             return;                 // abort
@@ -197,20 +196,22 @@ module.exports = function(RED) {
                             return;                 // abort
                         }
                         
-                        clearTimeout(this.ht);      // Clear any timeout
-                        this.ht = undefined;
-
                         d('Sensor deactivated.');
                         this.a=false;               // Set to inactive
+                        this.updTimeout();          // Clear any timeout (after deact)
                         main.deactivate(st);        // Try deactivate main
                         updateStatus();
                     },
                     updTimeout: function() {
                         d('Resetting sensor timeout ' + tSensor);
                         clearTimeout(this.ht);
-                        if (this.a && main.a) {
-                            d('Assign sensor timeout');
-                            this.ht=setTimeout(()=>this.timeOut(), tSensor);
+                        this.ht=undefined;
+
+                        if (tSensor > 0) {          // If sensor timeout specified
+                            if (this.a && main.a) { // Must be active (Sensor and main)
+                                d('Assign sensor timeout');
+                                this.ht=setTimeout(()=>this.timeOut(), tSensor);
+                            }
                         }
                     },
                     timeOut: function() {
@@ -234,13 +235,19 @@ module.exports = function(RED) {
         }
 
         function state(id, msg) {
-            if (config.useCount)
-                id = {id:id.id,name:id.name,active:cSensor(),total:sensors.length};
+            id = Object.assign({},id);
+            
+            if (config.useCount) {
+                id.active=cSensor();
+                id.total=sensors.length;
+            }
             
             if (config.seperated) {
                 var ia = id==STATUS_ACTIVE;
+                d('sending seperated message for:',id, msg?'with message':'no message');
                 node.send([ia?msg:undefined , ia?undefined:msg , id]);
             } else {
+                d('sending bundled message for:',id, msg?'with message':'no message');
                 node.send([msg,id]);
             }
             
@@ -248,7 +255,7 @@ module.exports = function(RED) {
         }
 
         function getData(value, type) {
-            d('Getting data: ' + value + ' (type=' + type + ')');
+            d('Getting data:', value, '(type=', type, ')');
             switch (type) {
                 case "payl":    return latMsg;
                 case "pay":     return orgMsg;
