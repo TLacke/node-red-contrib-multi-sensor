@@ -1,10 +1,10 @@
 {
-    "name": "node-red-multi-sensor",
-    "version": "1.1.3",
+    "name": "node-red-contrib-multi-sensor",
+    "version": "1.1.4",
     "description": "A Node-RED multiple binary-sensor linker",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/TLacke/node-red-multi-sensor.git"
+        "url": "git+https://github.com/TLacke/node-red-contrib-multi-sensor.git"
     },
     "keywords": [
         "node",
@@ -20,9 +20,9 @@
         }
     },
     "bugs": {
-        "url": "https://github.com/TLacke/node-red-multi-sensor/issues"
+        "url": "https://github.com/TLacke/node-red-contrib-multi-sensor/issues"
     },
-    "homepage": "https://github.com/TLacke/node-red-multi-sensor#readme",
+    "homepage": "https://github.com/TLacke/node-red-contrib-multi-sensor#readme",
     "author": "Tommy Lacke <tommy.lacke@gmail.com>",
     "license": "MIT"
 }
