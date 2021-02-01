@@ -1,4 +1,4 @@
-# node-red-multi-sensor
+# node-red-contrib-multi-sensor
 Binary motion sensor and activation state machine node for Node-red.
 
 This node is a companion for any binary sensor (physical or virtual), storing all recieved sensors and their state and merge them into a single node.
@@ -11,12 +11,12 @@ This node is a companion for any binary sensor (physical or virtual), storing al
 
 <a name="installation_in_node-red"></a>
 ### In Node-RED (preferred)
-* Via Manage Palette -> Search for "node-red-multi-sensor"
+* Via Manage Palette -> Search for "node-red-contrib-multi-sensor"
 
 <a name="installation_in_a_shell"></a>
 ### In a shell
 * go to the Node-RED installation folder, e.g.: `~/.node-red`
-* run `npm install node-red-multi-sensor`
+* run `npm install node-red-contrib-multi-sensor`
 
 <a name="usage"></a>
 ## Usage
