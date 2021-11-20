@@ -164,6 +164,13 @@ module.exports = function(RED) {
                     st=DA_TIMEOUT;
                 
                 sensors.forEach(s=>s.deactivate(st));
+                
+                // If in inactivation stage, this must be treated.
+                if (main.hInactive) {
+                    d('Direct reset');
+                    clearTimeout(main.hInactive);
+                    main.onDeactivate(st);
+                }
             }
         };
 
