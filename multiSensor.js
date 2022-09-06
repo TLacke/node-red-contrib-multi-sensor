@@ -267,7 +267,7 @@ module.exports = function(RED) {
                 case "payl":    return latMsg;
                 case "pay":     return orgMsg;
                 case "nul":     return undefined;
-                default:        return RED.util.evaluateNodeProperty(value, type, node, latMsg);
+                default:        return {payload:RED.util.evaluateNodeProperty(value, type, node, latMsg)};
             }
         }
 
