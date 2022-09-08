@@ -127,6 +127,7 @@ The configuration simulates two different sensors and gives you the option to ma
 
 
 ## Version history
+v2.0.0 Breaking change when output native values (booleans, numbers, strings). Now they're contained in {payload:[value]} previously the value was sent direclty.
 v1.0.0 Completed documentation and translations
 v0.1.0 Initial release
 
