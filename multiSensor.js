@@ -267,7 +267,11 @@ module.exports = function(RED) {
                 case "payl":    return latMsg;
                 case "pay":     return orgMsg;
                 case "nul":     return undefined;
-                default:        return {payload:RED.util.evaluateNodeProperty(value, type, node, latMsg)};
+                default:
+                    value = RED.util.evaluateNodeProperty(value, type, node, latMsg);
+                    if (typeof value == 'object')
+                        return value;
+                    return {payload:value};
             }
         }
 
